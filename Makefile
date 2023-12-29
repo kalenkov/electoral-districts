@@ -1,3 +1,5 @@
+export SHAPE_REWIND_ON_WRITE := YES
+
 .PHONY: all
 all: okrugs_diss.geojson check
 
@@ -13,24 +15,20 @@ splits.shp: splits.geojson
 splits_union.shp: splits.shp
 	ogr2ogr -lco ENCODING=UTF-8 -f "ESRI Shapefile" splits_union.shp splits.shp -dialect SQLITE -sql "SELECT ST_Union(geometry) FROM splits"
 
-source_in.shp: source.shp splits_union.shp
-	ogr2ogr -lco ENCODING=UTF-8 -overwrite -dialect SQLITE -sql "SELECT ST_Intersection(A.geometry, B.geometry) AS geometry, A.district AS district, A.osm_id AS osm_id FROM 'source' A, 'splits_union' B WHERE ST_Intersects(A.geometry, B.geometry)" . . -nlt POLYGON -skipfailures -nln source_in
+source_join.shp: source.shp full.csv
+	ogr2ogr -lco ENCODING=UTF-8 -f "ESRI Shapefile" -sql "SELECT source.district AS district, source.osm_id AS osm_id, full.okrug AS okrug FROM source JOIN 'full.csv'.full AS full ON source.district = full.district"  source_join.shp source.shp
 
-source_out.shp: source.shp splits_union.shp
-	ogr2ogr -lco ENCODING=UTF-8 -overwrite -dialect SQLITE -sql "SELECT ST_Difference(A.geometry, B.geometry) AS geometry, A.district AS district, A.osm_id AS osm_id FROM 'source' A, 'splits_union' B WHERE A.geometry != B.geometry" . . -nln source_out
+full.shp: source_join.shp
+	ogr2ogr -lco ENCODING=UTF-8 -f "ESRI Shapefile" -sql "SELECT source_join.district AS district, source_join.okrug AS okrug FROM source_join WHERE source_join.okrug IS NOT NULL" full.shp source_join.shp
 
-source_union.shp: source_in.shp source_out.shp
-	ogr2ogr -lco ENCODING=UTF-8 -f "ESRI Shapefile" source_union.shp source_in.shp
-	ogr2ogr -f "ESRI Shapefile" -update -append source_union.shp source_out.shp -nln source_union
+part.shp: source_join.shp
+	ogr2ogr -lco ENCODING=UTF-8 -f "ESRI Shapefile" -sql "SELECT source_join.district AS district FROM source_join WHERE source_join.okrug IS NULL" part.shp source_join.shp
 
-full_join.shp: source_union.shp full.csv
-	ogr2ogr -lco ENCODING=UTF-8 -f "ESRI Shapefile" -sql "SELECT source_union.district AS district, source_union.osm_id AS osm_id, full.okrug AS okrug FROM source_union JOIN 'full.csv'.full AS full ON source_union.district = full.district"  full_join.shp source_union.shp
+full_in.shp: full.shp splits_union.shp
+	ogr2ogr -lco ENCODING=UTF-8 -overwrite -dialect SQLITE -sql "SELECT ST_Intersection(A.geometry, B.geometry) AS geometry, A.district AS district, A.okrug AS okrug FROM 'full' A, 'splits_union' B WHERE ST_Intersects(A.geometry, B.geometry)" . . -nlt POLYGON -skipfailures -nln full_in
 
-full.shp: full_join.shp
-	ogr2ogr -lco ENCODING=UTF-8 -f "ESRI Shapefile" -sql "SELECT full_join.district AS district, full_join.okrug AS okrug FROM full_join WHERE full_join.okrug IS NOT NULL"  full.shp full_join.shp
-
-part.shp: full_join.shp
-	ogr2ogr -lco ENCODING=UTF-8 -f "ESRI Shapefile" -sql "SELECT full_join.district AS district FROM full_join WHERE full_join.okrug IS NULL"  part.shp full_join.shp
+full_out.shp: full.shp splits_union.shp
+	ogr2ogr -lco ENCODING=UTF-8 -overwrite -dialect SQLITE -sql "SELECT ST_Difference(A.geometry, B.geometry) AS geometry, A.district AS district, A.okrug AS okrug FROM 'full' A, 'splits_union' B WHERE A.geometry != B.geometry" . . -nln full_out
 
 part_in.shp: part.shp splits.shp
 	ogr2ogr -lco ENCODING=UTF-8 -overwrite -dialect SQLITE -sql "SELECT ST_Intersection(A.geometry, B.geometry) AS geometry, A.*, B.'in' AS okrug FROM 'part' A, 'splits' B WHERE ST_Intersects(A.geometry, B.geometry) AND A.district=B.district" . . -nlt POLYGON -skipfailures -nln part_in
@@ -38,8 +36,9 @@ part_in.shp: part.shp splits.shp
 part_out.shp: part.shp splits.shp
 	ogr2ogr -lco ENCODING=UTF-8 -overwrite -dialect SQLITE -sql "SELECT ST_Difference(A.geometry, B.geometry) AS geometry, A.*, B.'out' AS okrug FROM 'part' A, 'splits' B WHERE A.geometry != B.geometry AND A.district=B.district" . . -nln part_out
 
-okrugs.shp: full.shp part_in.shp part_out.shp
-	ogr2ogr -lco ENCODING=UTF-8 -f "ESRI Shapefile" okrugs.shp full.shp
+okrugs.shp: full_in.shp full_out.shp part_in.shp part_out.shp
+	ogr2ogr -lco ENCODING=UTF-8 -f "ESRI Shapefile" okrugs.shp full_in.shp
+	ogr2ogr -f "ESRI Shapefile" -update -append okrugs.shp full_out.shp -nln okrugs
 	ogr2ogr -f "ESRI Shapefile" -update -append okrugs.shp part_in.shp -nln okrugs
 	ogr2ogr -f "ESRI Shapefile" -update -append okrugs.shp part_out.shp -nln okrugs
 
