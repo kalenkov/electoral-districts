@@ -62,7 +62,6 @@ check: source.csv splits.csv full.csv
 .PHONY: clean
 clean:
 	rm -f *.shp *.prj *.cpg *.shx *.dbf
-	rm -f okrugs_diss.geojson
 	rm -f source.csv
 	rm -f splits.csv
 	
