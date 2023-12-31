@@ -36,3 +36,6 @@ Script for generation of the electoral districts
 
 ### Файл с запросом overpass-turbo
 Границы требуемых муниципальных образований и/или городских районов запрашиваются из базы OpenStreetMap с помощью сервиса [overpass-turbo](https://overpass-turbo.eu/). Соответствующий запрос должен содержаться в файле `overpass.txt`
+
+## Использование скрипта
+В каталог с файлами `Makefile` и `check.py` нужно поместить файл `overpass.txt` с текстом запроса к сервису overpass-turbo, файлы с описанием границ округов `full.csv`, `splits.geojson`, а также файл с дополнительной информацией `data.csv`.
