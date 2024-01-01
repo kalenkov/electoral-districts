@@ -47,7 +47,7 @@ okrugs_diss.shp: okrugs.shp
 
 okrugs_diss.geojson: okrugs_diss.shp data.csv
 	rm -f okrugs_diss.geojson
-	ogr2ogr -overwrite -f GeoJSON -sql "SELECT okrugs_diss.okrug AS okrug, data.name AS name, data.color_id AS color_id, data.color AS color, data.voters AS voters, data.terr AS terr FROM okrugs_diss LEFT JOIN 'data.csv'.data ON okrugs_diss.okrug = data.okrug"  okrugs_diss.geojson okrugs_diss.shp
+	ogr2ogr -overwrite -f GeoJSON -sql "SELECT okrugs_diss.okrug AS okrug, data.* FROM okrugs_diss LEFT JOIN 'data.csv'.data ON okrugs_diss.okrug = data.okrug"  okrugs_diss.geojson okrugs_diss.shp
 
 splits.csv: splits.shp
 	ogr2ogr -f CSV -dialect SQLITE -sql "SELECT splits.district AS district FROM splits" splits.csv splits.shp
