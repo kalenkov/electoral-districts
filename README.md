@@ -36,16 +36,18 @@ Information about all municipalities and/or urban districts that are divided int
 
 mean that the part of the district район Щукино contained within the corresponding polygon belongs to electoral district 3, and the remaining part belongs to electoral district 5. The script was tested only for cases where the municipality and/or urban district is divided between a maximum of two electoral districts. If the municipality and/or urban district is divided among a larger number of districts, the *outside* attribute should not specified (must be NULL). In this case, the script should also work, but this has not been tested. The script process the values specified in the *district*, *osm_id* columns in the same way, as in the case of the `full.csv` file.
 
-Если есть такая возможность, то лучше стараться так расположить полигоны, чтобы они не пересекались. Если этого добиться невозможно, то на получающихся избирательных округах могут появиться артефакты, которые однако не влияют на правильность результата.
+If there is such a possibility, then it is better to try to arrange the polygons so that they do not intersect. If this cannot be achieved, then artifacts may appear in the resulting boundaries of the electoral districts, which, however, do not affect the correctness of the result.
 
 ### Supplemental data file
 
 Additional information about electoral districts must be placed into the `data.csv` file. It must contain the *electoral_district* column. Information from the remaining columns will be added as attributes to the resulting file with boundaries of the electoral districts.
 
-## Использование скрипта
-В каталог с файлами `Makefile` и `check.py` нужно поместить файл `overpass.txt` с текстом запроса к сервису overpass-turbo, файлы с описанием границ округов `full.csv`, `splits.geojson`, а также файл с дополнительной информацией `data.csv`.
+## Script usage
 
-Скрипт оформлен в виде Makefile'а. Для получения итогового файла достаточно выполнить команду *make* с каталоге, где расположены файлы. В самом конце будет выполнена проверка, все ли необходимые границы были скачаны с помощью запроса из файла `overpass.txt`. Если часть границ будет отсутствовать, то в конце выведется сообщение об этом.
+In the directory with the files `Makefile` and `check.py` you need to place the file `overpass.txt` with the text of the request to the overpass-turbo service, files describing the boundaries of the electoral districts `full.csv`, `splits.geojson`, as well as the file with supplemental information `data.csv`.
 
-## Примеры
-Примеры исходных данных, для построение схемы одномандатных избирательных округов по выборам депутатов Московской городской Думы содержатся в каталогах MoscowCityDuma2014 и MoscowCityDuma2024. Там же содержится результат работы скрипта (файл `electoral_districts.geojson`) 
+The script is a Makefile file. To get the final result, just run the *make* command in the directory where the files are located. At the very end, a check will be made whever all the necessary boundaries have been downloaded using a request from the `overpass.txt` file. If some of the boundaries are missing, a message about this will be displayed at the end.
+
+## Examples
+
+Examples of source data for building boundaries of single-mandate electoral districts for the election of deputies of the Moscow City Duma are contained in the catalogs MoscowCityDuma2014 and MoscowCityDuma2024. It also contains the result of the script (file `electoral_districts.geojson`)
