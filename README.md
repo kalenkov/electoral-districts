@@ -1,28 +1,30 @@
 # electoral-districts
 Script for generation of the electoral districts 
 
-Скрипт строит схему одномандатных избирательных округов в формате GeoJSON, используя, где это возможно, информацию о границах муниципальных образований и/или городских районов, которые имеются в базе OpenStreetMap. Использовать скрипт имеет смысл, если территория каждого из избирательных округов почти всюду совпадает с границами муниципальных образований и/или городских районов. 
+The script builds a map of single-mandate electoral districts in GeoJSON format, using, where possible, information about the boundaries of municipalities and/or urban districts that are available in the OpenStreetMap database. It makes sense to use the script if the territory of each electoral district almost everywhere coincides with the boundaries of municipalities and/or urban districts.
 
-## Необходимые инструменты
+## Required Tools
 
 * python, make, wget, ogr2ogr
 
-## Подготовка исходных данных
+## Initial data preparation
 
-Для работы скрипта необходимо подготовить информацию о территориях одномандатных округов и запрос к базе OpenStreetMap для получения необходимых данных. 
+It is necessary to prepare information about the territories of single-member districts and a request to the OpenStreetMap database to obtain the necessary data.
 
-### Файл с запросом overpass-turbo
-Границы требуемых муниципальных образований и/или городских районов хранятся в базе OpenStreetMap в виде отношений (relations) и запрашиваются оттуда с помощью сервиса [overpass-turbo](https://overpass-turbo.eu/). Соответствующий запрос должен содержаться в файле `overpass.txt`. Необходимые данные данные можно подготовить и любым другим удобным способом и сохранить в файле `source.osm`. 
+### Overpass-turbo request file
 
-### Файл с данными о территориях, которые целиком находятся в пределах избирательного округа
-Сведения о муниципальных образованиях и/или гододских районах, которые целиком находятся в пределах избирательного округа указываются в файле `full.csv` в виде таблицы
+The boundaries of the required municipalities and/or urban districts are stored in the OpenStreetMap database in the form of relations and can be queried from the database using the [overpass-turbo](https://overpass-turbo.eu/) service. The corresponding request must be placed in the `overpass.txt` file. The data can be also prepared in any other convenient way and saved in the `source.osm` file.
+
+### File with data on territories that are contained entirely within the electoral district
+
+Information about municipalities and/or districts that are contained entirely within the electoral district is indicated in the file `full.csv` in the form of a table
 | district      | osm_id | electoral_district |
 |---------------|--------|--------------------|
 | район Крюково |        | 1                  |
 | район Куркино |        | 2                  |
 |     ...       |  ...   | ...                |
 
-Сведения о территориях, целиком входящих в пределы соответствующего избирательного округа, задаются в колонках *district* и/или *osm_id*. Значение *osm_id* можно не указывать, но в этом случае в колонке *district* должно быть указано название территории, как оно указано в базе OpenStreetMap (тег name) и это название должно быть уникальным среди всех территорий, полученных с помощью запроса `overpass.txt`. Если в файле указано *osm_id* ссответствующего отношения, то значение в колонке *district* может быть любым, так как в этом случае сопоставление идет по *osm_id*. В колонке *electoral_district* указывается номер избирательного округа (или любой другой идентификатор избирательного округа), в который входит целиком соответствующая территория
+Information about territories, which are contained entirely within the boundaries of the corresponding electoral district is specified in the *district* and/or *osm_id* columns. The *osm_id* value can be omitted, but in this case the *district* column must contain the name of the territory as it is specified in the OpenStreetMap database (name tag) and this name must be unique among all territories obtained using the `overpass.txt` request. If the file contains *osm_id* of the corresponding relation, then the value in the *district* column can be arbitrary, since in this case the matching is based on *osm_id* value. The *electoral_district* column indicates the number of the electoral district (or any other electoral district identifier) which contains the corresponding territory
 
 ### Файл с данными о территориях, которые разделены между несколькими избирательными округами
 Сведения обо всех муниципальных образованиях и/или гододских районах, которые делятся на несколько частей границами избирательных округов необходимо внести в файл `splits.geojson`, который должен содержать один полигональный слой *splits*. В этом файле должен содержаться полигональный слой с атрибутами *district*, *osm_id*, *inside*, *outside*. Атрибуты полигона вида 
