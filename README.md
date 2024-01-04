@@ -38,8 +38,9 @@ mean that the part of the district район Щукино contained within the 
 
 Если есть такая возможность, то лучше стараться так расположить полигоны, чтобы они не пересекались. Если этого добиться невозможно, то на получающихся избирательных округах могут появиться артефакты, которые однако не влияют на правильность результата.
 
-### Файл с дополнительными данными об избирательных округах
-Дополнительные сведения об избирательных округах необходимо внести в файл `data.csv`. В нем обязательна должна быть колонка *electoral_district*. Информация из остальных колонок будет добавлена в качестве атрибутов в результирующий файл с избирательными округами.
+### Supplemental data file
+
+Additional information about electoral districts must be placed into the `data.csv` file. It must contain the *electoral_district* column. Information from the remaining columns will be added as attributes to the resulting file with boundaries of the electoral districts.
 
 ## Использование скрипта
 В каталог с файлами `Makefile` и `check.py` нужно поместить файл `overpass.txt` с текстом запроса к сервису overpass-turbo, файлы с описанием границ округов `full.csv`, `splits.geojson`, а также файл с дополнительной информацией `data.csv`.
