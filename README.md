@@ -26,14 +26,15 @@ Information about municipalities and/or districts that are contained entirely wi
 
 Information about territories, which are contained entirely within the boundaries of the corresponding electoral district is specified in the *district* and/or *osm_id* columns. The *osm_id* value can be omitted, but in this case the *district* column must contain the name of the territory as it is specified in the OpenStreetMap database (name tag) and this name must be unique among all territories obtained using the `overpass.txt` request. If the file contains *osm_id* of the corresponding relation, then the value in the *district* column can be arbitrary, since in this case the matching is based on *osm_id* value. The *electoral_district* column indicates the number of the electoral district (or any other electoral district identifier) which contains the corresponding territory
 
-### Файл с данными о территориях, которые разделены между несколькими избирательными округами
-Сведения обо всех муниципальных образованиях и/или гододских районах, которые делятся на несколько частей границами избирательных округов необходимо внести в файл `splits.geojson`, который должен содержать один полигональный слой *splits*. В этом файле должен содержаться полигональный слой с атрибутами *district*, *osm_id*, *inside*, *outside*. Атрибуты полигона вида 
+### File with data on territories that are divided between several electoral districts
+
+Information about all municipalities and/or urban districts that are divided into several parts by the boundaries of electoral districts must be placed into the splits.geojson file, which must contain one splits polygonal layer. This file must contain a polygonal layer with the attributes *district*, *osm_id*, *inside*, *outside*. Attributes
 | district     | osm_id | inside | outside |
 |--------------|--------|--------|---------|
 | район Щукино |        |  3     |  5      |
 |     ...      |  ...   | ...    | ...     |
 
-означают, что часть района Щукино, содержащаяся внутри соответствующего полигона относится к округу № 3, а оставшаяся часть относится к округу № 5. Скрипт тестировался только для тех случаев, когда муниципальное образование и/или гододской район делится максимум между двумя округами. Если район муниципальное образование и/или гододской район разделен между большим количеством округов, атрибут *outside* не нужно указывать (должет быть равным NULL).  В этом случае скрипт вроде тоже должен работать, но это не проверялось. Логика обработки скриптом значений, указанных в колонках *district*, *osm_id* такая-же, как и в случае обработки аналогичных значений в файле `full.csv`.
+mean that the part of the district район Щукино contained within the corresponding polygon belongs to electoral district 3, and the remaining part belongs to electoral district 5. The script was tested only for cases where the municipality and/or urban district is divided between a maximum of two electoral districts. If the municipality and/or urban district is divided among a larger number of districts, the *outside* attribute should not specified (must be NULL). In this case, the script should also work, but this has not been tested. The script process the values specified in the *district*, *osm_id* columns in the same way, as in the case of the `full.csv` file.
 
 Если есть такая возможность, то лучше стараться так расположить полигоны, чтобы они не пересекались. Если этого добиться невозможно, то на получающихся избирательных округах могут появиться артефакты, которые однако не влияют на правильность результата.
 
