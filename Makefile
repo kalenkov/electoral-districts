@@ -32,8 +32,8 @@ source.gpkg: source.osm
 
 .PHONY: check
 check: source.gpkg
-	ogr2ogr -f CSV splits.csv source.gpkg -dialect SQLITE -sql "SELECT district FROM splits"
-	ogr2ogr -f CSV source.csv source.gpkg -dialect SQLITE -sql "SELECT district FROM source"
+	ogr2ogr -f CSV splits.csv source.gpkg -dialect SQLITE -sql "SELECT district, osm_id FROM splits"
+	ogr2ogr -f CSV source.csv source.gpkg -dialect SQLITE -sql "SELECT district, osm_id FROM source"
 	python check.py
 
 .PHONY: clean
