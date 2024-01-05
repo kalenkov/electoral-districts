@@ -62,7 +62,7 @@ source.gpkg: source.osm
 	# dissolve the regions which belong to the same electoral district
 	ogr2ogr -f "GPKG" -update source.gpkg source.gpkg -dialect SQLITE -sql "SELECT ST_Union(geom) AS geom, electoral_district FROM electoral_districts GROUP BY electoral_district" -nln electoral_districts_diss -nlt MULTIPOLYGON
 	
-	# export the final result to the GeoJSON file and add the supplemental atributes from data.csv file 
+	# export the final result to the GeoJSON file and add the supplemental attributes from data.csv file 
 	rm -f electoral_districts.geojson
 	ogr2ogr -f GeoJSON electoral_districts.geojson source.gpkg -dialect OGRSQL -sql "SELECT electoral_districts_diss.electoral_district AS electoral_district, data.* FROM electoral_districts_diss LEFT JOIN 'data.csv'.data ON electoral_districts_diss.electoral_district = data.electoral_district" -nln electoral_districts
 
