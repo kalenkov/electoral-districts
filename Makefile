@@ -1,7 +1,9 @@
+mkfile_path := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+
 .PHONY: all
 all: source.gpkg check
 
-source.osm: overpass.txt
+source.osm: 
 	# download OSM data
 	wget -O source.osm --post-file=overpass.txt "http://overpass-api.de/api/interpreter"
 
@@ -57,11 +59,12 @@ source.gpkg: source.osm
 	ogr2ogr -f "GPKG" -append source.gpkg source.gpkg -dialect SQLITE -sql "SELECT ST_Intersection(A.geom, B.geom) AS geom, A.*, B.inside AS electoral_district FROM part A, splits B WHERE ST_Intersects(A.geom, B.geom) AND B.inside IS NOT NULL AND ((A.district=B.district AND B.osm_id IS NULL) OR (A.osm_id=B.osm_id AND B.osm_id IS NOT NULL))" -nlt MULTIPOLYGON -skipfailures -nln electoral_districts
 
 	# find difference of the splitted district with appropriate polygon from the "splits" layer
-	ogr2ogr -f "GPKG" -append source.gpkg source.gpkg -dialect SQLITE -sql "SELECT ST_Difference(A.geom, B.geom) AS geom, A.*, B.outside AS electoral_district FROM part A, splits B WHERE A.geom != B.geom AND AND B.outside IS NOT NULL ((A.district=B.district AND B.osm_id IS NULL) OR (A.osm_id=B.osm_id AND B.osm_id IS NOT NULL))" -nlt MULTIPOLYGON -nln electoral_districts
+	ogr2ogr -f "GPKG" -append source.gpkg source.gpkg -dialect SQLITE -sql "SELECT ST_Difference(A.geom, B.geom) AS geom, A.*, B.outside AS electoral_district FROM part A, splits B WHERE A.geom != B.geom AND B.outside IS NOT NULL AND ((A.district=B.district AND B.osm_id IS NULL) OR (A.osm_id=B.osm_id AND B.osm_id IS NOT NULL))" -nlt MULTIPOLYGON -nln electoral_districts
 	
 	# dissolve the regions which belong to the same electoral district
 	ogr2ogr -f "GPKG" -update source.gpkg source.gpkg -dialect SQLITE -sql "SELECT ST_Union(geom) AS geom, electoral_district FROM electoral_districts GROUP BY electoral_district" -nln electoral_districts_diss -nlt MULTIPOLYGON
-	
+
+electoral_districts.geojson: source.gpkg data.csv
 	# export the final result to the GeoJSON file and add the supplemental attributes from data.csv file 
 	rm -f electoral_districts.geojson
 	ogr2ogr -f GeoJSON electoral_districts.geojson source.gpkg -dialect OGRSQL -sql "SELECT electoral_districts_diss.electoral_district AS electoral_district, data.* FROM electoral_districts_diss LEFT JOIN 'data.csv'.data ON electoral_districts_diss.electoral_district = data.electoral_district" -nln electoral_districts
@@ -70,12 +73,44 @@ source.gpkg: source.osm
 check: source.gpkg
 	ogr2ogr -f CSV splits.csv source.gpkg -dialect SQLITE -sql "SELECT district, osm_id FROM splits"
 	ogr2ogr -f CSV source.csv source.gpkg -dialect SQLITE -sql "SELECT district, osm_id FROM source"
-	python check.py
+	python ${mkfile_path}/check.py
 
 .PHONY: clean
 clean:
 	rm -f source.gpkg
 	rm -f source.csv
 	rm -f splits.csv
+
+diff.gpkg: electoral_districts.geojson electoral_districts_orig.geojson
+	#-t_srs ESRI:54034 
+	ogr2ogr -f "GPKG" -overwrite diff.gpkg electoral_districts.geojson -dialect SQLITE -sql "SELECT GEOMETRY AS geom, * FROM electoral_districts" -nlt MULTIPOLYGON -nln electoral_districts
+	ogr2ogr -f "GPKG" -update diff.gpkg electoral_districts_orig.geojson -dialect SQLITE -sql "SELECT GEOMETRY AS geom, * FROM electoral_districts" -nlt MULTIPOLYGON -nln electoral_districts_orig
+	ogr2ogr -f "GPKG" -update diff.gpkg diff.gpkg -dialect SQLITE -sql "SELECT ST_Intersection(A.geom, B.geom) AS geom, ST_Area(ST_Intersection(A.geom, B.geom)) AS area, ST_Area(A.geom) AS areaA, ST_Area(B.geom) AS areaB, A.electoral_district AS electoral_district FROM electoral_districts A, electoral_districts_orig B WHERE ST_Intersects(A.geom, B.geom) AND A.electoral_district=B.electoral_district" -nlt MULTIPOLYGON -skipfailures -nln electoral_districts_intersect
+	ogr2ogr -f "GPKG" -update diff.gpkg diff.gpkg -dialect SQLITE -sql "SELECT ST_Difference(A.geom, B.geom) AS geom, A.electoral_district AS electoral_district, ST_Area(ST_Difference(A.geom, B.geom)) AS area, ST_Area(A.geom) AS areaA, ST_Area(B.geom) AS areaB FROM electoral_districts A, electoral_districts_orig B WHERE A.geom != B.geom AND A.electoral_district=B.electoral_district" -nlt MULTIPOLYGON -nln electoral_districts_diff
+	ogr2ogr -f "GPKG" -update diff.gpkg diff.gpkg -dialect SQLITE -sql "SELECT ST_Difference(A.geom, B.geom) AS geom, A.electoral_district AS electoral_district, ST_Area(ST_Difference(A.geom, B.geom)) AS area, ST_Area(A.geom) AS areaA, ST_Area(B.geom) AS areaB FROM electoral_districts_orig A, electoral_districts B WHERE A.geom != B.geom AND A.electoral_district=B.electoral_district" -nlt MULTIPOLYGON -nln electoral_districts_diff2
+	ogr2ogr -f CSV electoral_districts.csv diff.gpkg -dialect SQLITE -sql "SELECT * FROM electoral_districts"
+	ogr2ogr -f CSV electoral_districts_orig.csv diff.gpkg -dialect SQLITE -sql "SELECT * FROM electoral_districts_orig"
+	ogr2ogr -f CSV electoral_districts_intersect.csv diff.gpkg -dialect SQLITE -sql "SELECT * FROM electoral_districts_intersect WHERE area IS NOT NULL"
+	ogr2ogr -f CSV electoral_districts_diff.csv diff.gpkg -dialect SQLITE -sql "SELECT * FROM electoral_districts_diff WHERE area IS NOT NULL"
+	ogr2ogr -f CSV electoral_districts_diff2.csv diff.gpkg -dialect SQLITE -sql "SELECT * FROM electoral_districts_diff2 WHERE area IS NOT NULL"
+
+.PHONY: clean_diff
+clean_diff:
+	rm -f diff.gpkg
+	rm -f diff2.gpkg
+	rm -f electoral_districts.csv
+	rm -f electoral_districts_orig.csv
+	rm -f electoral_districts_intersect.csv
+	rm -f electoral_districts_diff.csv
+	rm -f electoral_districts_diff2.csv
 	
+
+.PHONY: test
+test: diff.gpkg
+	python ${mkfile_path}/test.py
+
+
+.PHONY: clean_all
+clean_all: clean clean_diff
+	rm -f electoral_districts.geojson
 

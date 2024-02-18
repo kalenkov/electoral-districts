@@ -15,7 +15,9 @@ with open('splits.csv') as csv_file:
     reader = csv.DictReader (csv_file, delimiter=",")
     for row in reader:
         district=row.get ("district")
-        osm_id=row.get ("osm_id")
+        if district == "":
+            continue
+        osm_id=row.get("osm_id")
         if osm_id == '':
             if source_district.count(district) !=1:
                 print(f"Error: district {district} occurs in source.osm {source_district.count(district)} times")
