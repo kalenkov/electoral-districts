@@ -54,10 +54,10 @@ source.gpkg: source.osm
 	ogr2ogr -f "GPKG" -append source.gpkg source.gpkg -dialect SQLITE -sql "SELECT ST_Difference(A.geom, B.geom) AS geom, A.district AS district, A.electoral_district AS electoral_district FROM 'full' A, splits_union B WHERE A.geom != B.geom" -nlt MULTIPOLYGON -nln electoral_districts
 
 	# find intersection of the splitted district with appropriate polygon from the "splits" layer
-	ogr2ogr -f "GPKG" -append source.gpkg source.gpkg -dialect SQLITE -sql "SELECT ST_Intersection(A.geom, B.geom) AS geom, A.*, B.inside AS electoral_district FROM part A, splits B WHERE ST_Intersects(A.geom, B.geom) AND ((A.district=B.district AND B.osm_id IS NULL) OR (A.osm_id=B.osm_id AND B.osm_id IS NOT NULL))" -nlt MULTIPOLYGON -skipfailures -nln electoral_districts
+	ogr2ogr -f "GPKG" -append source.gpkg source.gpkg -dialect SQLITE -sql "SELECT ST_Intersection(A.geom, B.geom) AS geom, A.*, B.inside AS electoral_district FROM part A, splits B WHERE ST_Intersects(A.geom, B.geom) AND B.inside IS NOT NULL AND ((A.district=B.district AND B.osm_id IS NULL) OR (A.osm_id=B.osm_id AND B.osm_id IS NOT NULL))" -nlt MULTIPOLYGON -skipfailures -nln electoral_districts
 
 	# find difference of the splitted district with appropriate polygon from the "splits" layer
-	ogr2ogr -f "GPKG" -append source.gpkg source.gpkg -dialect SQLITE -sql "SELECT ST_Difference(A.geom, B.geom) AS geom, A.*, B.outside AS electoral_district FROM part A, splits B WHERE A.geom != B.geom AND ((A.district=B.district AND B.osm_id IS NULL) OR (A.osm_id=B.osm_id AND B.osm_id IS NOT NULL))" -nlt MULTIPOLYGON -nln electoral_districts
+	ogr2ogr -f "GPKG" -append source.gpkg source.gpkg -dialect SQLITE -sql "SELECT ST_Difference(A.geom, B.geom) AS geom, A.*, B.outside AS electoral_district FROM part A, splits B WHERE A.geom != B.geom AND AND B.outside IS NOT NULL ((A.district=B.district AND B.osm_id IS NULL) OR (A.osm_id=B.osm_id AND B.osm_id IS NOT NULL))" -nlt MULTIPOLYGON -nln electoral_districts
 	
 	# dissolve the regions which belong to the same electoral district
 	ogr2ogr -f "GPKG" -update source.gpkg source.gpkg -dialect SQLITE -sql "SELECT ST_Union(geom) AS geom, electoral_district FROM electoral_districts GROUP BY electoral_district" -nln electoral_districts_diss -nlt MULTIPOLYGON
