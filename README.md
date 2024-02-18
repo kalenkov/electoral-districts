@@ -5,7 +5,7 @@ The script builds a map of single-mandate electoral districts in GeoJSON format,
 
 ## Required Tools
 
-* python, make, wget, ogr2ogr
+* python, make, wget, ogr2ogr, QGIS
 
 ## Initial data preparation
 
@@ -34,9 +34,7 @@ Information about all municipalities and/or urban districts that are divided int
 | район Щукино |        |  3     |  5      |
 |     ...      |  ...   | ...    | ...     |
 
-mean that the part of the district район Щукино contained within the corresponding polygon belongs to electoral district 3, and the remaining part belongs to electoral district 5. The script was tested only for cases where the municipality and/or urban district is divided between a maximum of two electoral districts. If the municipality and/or urban district is divided among a larger number of districts, the *outside* attribute should not specified (must be NULL). In this case, the script should also work, but this has not been tested. The script process the values specified in the *district*, *osm_id* columns in the same way, as in the case of the `full.csv` file.
-
-If there is such a possibility, then it is better to try to arrange the polygons so that they do not intersect. If this cannot be achieved, then artifacts may appear in the resulting boundaries of the electoral districts, which, however, do not affect the correctness of the result.
+mean that the part of the district район Щукино contained within the corresponding polygon belongs to electoral district 3, and the remaining part belongs to electoral district 5. If the municipality and/or urban district is divided among a larger number of districts, the *outside* attribute should not specified (must be NULL). The script process the values specified in the *district*, *osm_id* columns in the same way, as in the case of the `full.csv` file.
 
 ### Supplemental data file
 
