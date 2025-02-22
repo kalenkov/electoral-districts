@@ -1,16 +1,27 @@
 mkfile_path := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
+OVERPASS_SCRIPTS = $(wildcard overpass*.txt)
+OSM_SOURCES = $(patsubst overpass%.txt,source%.osm, $(OVERPASS_SCRIPTS))
+
+FIRST_OSM_SOURCE := $(firstword $(OSM_SOURCES))
+REST_OSM_SOURCES := $(filter-out $(FIRST_OSM_SOURCE),$(OSM_SOURCES))
+
 .PHONY: all
 all: source.gpkg check
 
-source.osm: 
-	# download OSM data
+source%.osm: overpass%.txt
+	wget -O $@ --post-file=$< "http://overpass-api.de/api/interpreter"
+
+source.osm: overpass.txt
 	wget -O source.osm --post-file=overpass.txt "http://overpass-api.de/api/interpreter"
 
-source.gpkg: source.osm
+source.gpkg: $(OSM_SOURCES)
 	# convert OSM data into multipolygon layer "source" in a GeoPackage source.gpkg file
 	# all subsequent intermediate results will be stored in file source.gpkg as separate layers
-	ogr2ogr -overwrite -f "GPKG" source.gpkg source.osm --config OGR_SQLITE_SYNCHRONOUS OFF --config OSM_USE_CUSTOM_INDEXING NO -sql "SELECT osm_id, name AS district from multipolygons where osm_id is not null" -nln source
+	ogr2ogr -overwrite -f "GPKG" source.gpkg $(FIRST_OSM_SOURCE) --config OGR_SQLITE_SYNCHRONOUS OFF --config OSM_USE_CUSTOM_INDEXING NO -sql "SELECT osm_id, name AS district from multipolygons where osm_id is not null" -nln source
+	$(foreach file, $(REST_OSM_SOURCES), \
+		ogr2ogr -append -f "GPKG" source.gpkg $(file) --config OGR_SQLITE_SYNCHRONOUS OFF --config OSM_USE_CUSTOM_INDEXING NO -sql "SELECT osm_id, name AS district from multipolygons where osm_id is not null" -nln source; \
+	)
 	
 	# convert splits.geojson file into polygonal layer "splits" in the file source.gpkg
 	ogr2ogr -f "GPKG" -overwrite source.gpkg splits.geojson -nln splits
