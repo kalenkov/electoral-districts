@@ -1,15 +1,21 @@
 import csv
 import sys
+import argparse
+
+parser = argparse.ArgumentParser(description="Check that the data from two GeoJson files is identical.")
+parser.add_argument("--source", required=True, help="Path to first source CSV file")
+parser.add_argument("--source_orig", required=True, help="Path to original CSV file")
+parser.add_argument("--intersection", required=True, help="Path to the intersection CSV file")
+parser.add_argument("--difference1", required=True, help="Path to first difference (between new and old) CSV file")
+parser.add_argument("--difference2", required=True, help="Path to second difference (between old and new) CSV file")
+args = parser.parse_args()
 
 rel_err=0.0000001
 abs_err=1.0*(1.0/100000.0)*(1.0/100000.0) #roughly 1m2 at the equator
 
-
-source_csv=['electoral_districts.csv', 'electoral_districts_orig.csv']
-source_csv_intersect=['electoral_districts_intersect.csv']
-source_csv_difference=['electoral_districts_diff.csv', 'electoral_districts_diff2.csv']
-
-
+source_csv = [args.source, args.source_orig]
+source_csv_intersect = [args.intersection]
+source_csv_difference = [args.difference1, args.difference2]
 
 csv_file = {}
 csv_data = {}
@@ -108,5 +114,5 @@ for filename in source_csv_difference:
 for filename in source_csv_intersect:
     check_interection(csv_data[filename])
     
-check_attributes(csv_data['electoral_districts.csv'], csv_data['electoral_districts_orig.csv'])
+check_attributes(csv_data[source_csv[0]], csv_data[source_csv[1]])
 

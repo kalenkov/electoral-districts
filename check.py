@@ -1,9 +1,17 @@
 import csv
+import argparse
+
+
+parser = argparse.ArgumentParser(description="Check of the consistency of the source data.")
+parser.add_argument("--source", required=True, help="Path to source CSV file")
+parser.add_argument("--splits", required=True, help="Path to splits CSV file")
+parser.add_argument("--full", required=True, help="Path to the full CSV file")
+args = parser.parse_args()
 
 source_district=[]
 source_osm_id=[]
 
-with open('source.csv') as csv_file:
+with open(args.source) as csv_file:
     reader = csv.DictReader (csv_file, delimiter=",")
     for row in reader:
         source_district.append(row.get ("district"))
@@ -11,7 +19,7 @@ with open('source.csv') as csv_file:
 
 flag=True
 print("Search for errors in source data")
-with open('splits.csv') as csv_file:
+with open(args.splits) as csv_file:
     reader = csv.DictReader (csv_file, delimiter=",")
     for row in reader:
         district=row.get ("district")
@@ -28,7 +36,7 @@ with open('splits.csv') as csv_file:
                 flag=False
                 
 
-with open('full.csv') as csv_file:
+with open(args.full) as csv_file:
     reader = csv.DictReader (csv_file, delimiter=",")
     for row in reader:
         district=row.get ("district")
