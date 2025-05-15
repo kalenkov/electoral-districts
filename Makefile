@@ -7,6 +7,7 @@ FIRST_OSM_SOURCE := $(firstword $(OSM_SOURCES))
 REST_OSM_SOURCES := $(filter-out $(FIRST_OSM_SOURCE),$(OSM_SOURCES))
 
 NOQGIS ?= no
+CROPLAND ?= no
 
 define PART_AND_SPLITS_VRT
 <OGRVRTDataSource>
@@ -49,6 +50,20 @@ define SOURCE_AND_SPLITS_UNION_NOQGIS_VRT
 </OGRVRTDataSource>
 endef
 export SOURCE_AND_SPLITS_UNION_NOQGIS_VRT
+
+define DISSOLVED_AND_LAND_VRT
+<OGRVRTDataSource>
+    <OGRVRTLayer name="tmp_electoral_districts_dissolved">
+        <SrcDataSource>tmp_electoral_districts_dissolved.gpkg</SrcDataSource>
+        <SrcLayer>tmp_electoral_districts_dissolved</SrcLayer>
+    </OGRVRTLayer>
+    <OGRVRTLayer name="land">
+        <SrcDataSource>land.gpkg</SrcDataSource>
+        <SrcLayer>land</SrcLayer>
+    </OGRVRTLayer>
+</OGRVRTDataSource>
+endef
+export DISSOLVED_AND_LAND_VRT
 
 .PHONY: all
 all: source.gpkg check
@@ -136,10 +151,24 @@ tmp_electoral_districts.gpkg: tmp_entire_districts.gpkg tmp_parts_intersections.
 tmp_electoral_districts_dissolved.gpkg: tmp_electoral_districts.gpkg
 	ogr2ogr -f "GPKG" -overwrite tmp_electoral_districts_dissolved.gpkg tmp_electoral_districts.gpkg -dialect SQLITE -sql "SELECT ST_Union(geom) AS geom, electoral_district FROM tmp_electoral_districts GROUP BY electoral_district" -nln tmp_electoral_districts_dissolved -nlt MULTIPOLYGON
 
+tmp_dissolved_and_land.vrt: tmp_electoral_districts_dissolved.gpkg land.gpkg
+	echo "$$DISSOLVED_AND_LAND_VRT" > tmp_dissolved_and_land.vrt
+
+# crop electoral districts with land polygon
+tmp_electoral_districts_land.gpkg: tmp_dissolved_and_land.vrt
+	ogr2ogr -f "GPKG" -overwrite tmp_electoral_districts_land.gpkg tmp_dissolved_and_land.vrt -dialect SQLITE -sql "SELECT ST_Union(ST_CollectionExtract(ST_Intersection(A.geom, B.geom),3)) AS geom, A.electoral_district AS electoral_district FROM tmp_electoral_districts_dissolved A, land B WHERE ST_Intersects(A.geom, B.geom) GROUP BY A.electoral_district" -nlt MULTIPOLYGON -skipfailures -nln tmp_electoral_districts_land
+
 # export the final result to the GeoJSON file and add the supplemental attributes from data.csv file
+ifeq ($(CROPLAND), yes)
+electoral_districts.geojson: tmp_electoral_districts_land.gpkg data.csv
+	rm -f electoral_districts.geojson
+	ogr2ogr -f GeoJSON electoral_districts.geojson tmp_electoral_districts_land.gpkg -dialect OGRSQL -sql "SELECT tmp_electoral_districts_land.electoral_district AS electoral_district, data.* FROM tmp_electoral_districts_land LEFT JOIN 'data.csv'.data ON tmp_electoral_districts_land.electoral_district = data.electoral_district" -nln electoral_districts
+else
 electoral_districts.geojson: tmp_electoral_districts_dissolved.gpkg data.csv
 	rm -f electoral_districts.geojson
 	ogr2ogr -f GeoJSON electoral_districts.geojson tmp_electoral_districts_dissolved.gpkg -dialect OGRSQL -sql "SELECT tmp_electoral_districts_dissolved.electoral_district AS electoral_district, data.* FROM tmp_electoral_districts_dissolved LEFT JOIN 'data.csv'.data ON tmp_electoral_districts_dissolved.electoral_district = data.electoral_district" -nln electoral_districts
+endif
+
 
 diff_electoral_districts.gpkg: electoral_districts.geojson
 	ogr2ogr -f "GPKG" -overwrite diff_electoral_districts.gpkg electoral_districts.geojson -dialect SQLITE -sql "SELECT GEOMETRY AS geom, * FROM electoral_districts" -nlt MULTIPOLYGON -nln diff_electoral_districts
