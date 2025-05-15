@@ -1,0 +1,152 @@
+area[name="Приволжский федеральный округ"][admin_level=3]->.pfo;
+
+// district 3-8
+rel(area.pfo)[name="Башкортостан"][admin_level=4];
+map_to_area -> .r02;
+rel(area.pfo)[name="Уфимский район"][admin_level=6];
+map_to_area -> .r02ufimskii;
+
+// district 31-36
+rel(area.pfo)[name="Татарстан"][admin_level=4];
+map_to_area -> .r31;
+rel(area.pfo)[name="городской округ Казань"][admin_level=6];
+map_to_area -> .r31kazan;
+rel(area.pfo)[name="Менделеевский район"][admin_level=6];
+map_to_area -> .r31mendeleyevsky;
+
+// district 38-39
+rel(area.pfo)[name="Удмуртия"][admin_level=4];
+map_to_area -> .r38;
+rel(area.pfo)[name="городской округ Ижевск"][admin_level=6];
+map_to_area -> .r38izhevsk;
+
+// district 42-43
+rel(area.pfo)[name="Чувашия"][admin_level=4];
+map_to_area -> .r42;
+rel(area.pfo)[name="городской округ Чебоксары"][admin_level=6];
+map_to_area -> .r42cheboksary;
+
+// district 62-65
+rel(area.pfo)[name="Пермский край"][admin_level=4];
+map_to_area -> .r62;
+rel(area.pfo)[name="Пермский городской округ"][admin_level=6];
+map_to_area -> .r62perm;
+
+// district 106-107
+rel(area.pfo)[name="Кировская область"][admin_level=4];
+map_to_area -> .r106;
+rel(area.pfo)[name="городской округ Киров"][admin_level=6];
+map_to_area -> .r106kirov;
+
+// district 131-135
+rel(area.pfo)[name="Нижегородская область"][admin_level=4];
+map_to_area -> .r131;
+rel(area.pfo)[name="городской округ Нижний Новгород"][admin_level=6];
+map_to_area -> .r131nnovgorod;
+
+// district 144-146
+rel(area.pfo)[name="Оренбургская область"][admin_level=4];
+map_to_area -> .r144;
+rel(area.pfo)[name="городской округ Оренбург"][admin_level=6];
+map_to_area -> .r144orenburg;
+
+// district 148-149
+rel(area.pfo)[name="Пензенская область"][admin_level=4];
+map_to_area -> .r148;
+rel(area.pfo)[name="городской округ Пенза"][admin_level=6];
+map_to_area -> .r148penza;
+
+// district 159-163
+rel(area.pfo)[name="Самарская область"][admin_level=4];
+map_to_area -> .r159;
+rel(area.pfo)[name="городской округ Самара"][admin_level=6];
+map_to_area -> .r159samara;
+rel(area.pfo)[name="городской округ Тольятти"][admin_level=6];
+map_to_area -> .r159tolyatti;
+rel(area.pfo)[name="Волжский район"][admin_level=6];
+map_to_area -> .r159volzhsky;
+rel(area.pfo)[name="Ставропольский район"][admin_level=6];
+map_to_area -> .r159stavropolsky;
+
+// district 164-167
+rel(area.pfo)[name="Саратовская область"][admin_level=4];
+map_to_area -> .r164;
+rel(area.pfo)[name="городской округ Саратов"][admin_level=6];
+map_to_area -> .r164saratov;
+
+// district 185-186
+rel(area.pfo)[name="Ульяновская область"][admin_level=4];
+map_to_area -> .r185;
+rel(area.pfo)[name="городской округ Ульяновск"][admin_level=6];
+map_to_area -> .r185ulyanovsk;
+
+(
+// district 3-8
+rel(area.r02)["admin_level"=6][name!="Уфимский район"];
+rel(area.r02)["admin_level"=9];
+rel(area.r02ufimskii)["admin_level"=8];
+
+// district 27
+rel(area.pfo)["admin_level"=4][name="Марий Эл"];
+
+// district 28
+rel(area.pfo)["admin_level"=4][name="Мордовия"];
+
+// district 31-36
+rel(area.r31)["admin_level"=6][name!~"^(городской округ Казань|Менделеевский район)$"];
+rel(area.r31kazan)["admin_level"=9];
+rel(area.r31mendeleyevsky)["admin_level"=8];
+
+// district 38-39
+rel(area.r38)["admin_level"=6][name!="городской округ Ижевск"];
+rel(area.r38izhevsk)["admin_level"=9];
+
+// district 42-43
+rel(area.r42)["admin_level"=6][name!="городской округ Чебоксары"];
+rel(area.r42cheboksary)["admin_level"=9];
+
+// district 62-65
+rel(area.r62)["admin_level"=6][name!~"^(Пермский городской округ)$"];
+rel(area.r62perm)["admin_level"=9];
+
+// district 106-107
+rel(area.r106)["admin_level"=6][name!~"^(городской округ Киров)$"];
+rel(area.r106kirov)["admin_level"=9];
+
+// district 131-135
+rel(area.r131)["admin_level"=6][name!~"^(городской округ Нижний Новгород)$"];
+rel(area.r131nnovgorod)["admin_level"=9];
+
+// district 144-146
+rel(area.r144)["admin_level"=6][name!~"^(городской округ Оренбург)$"];
+rel(area.r144orenburg)["admin_level"=9];
+
+// district 148-149
+rel(area.r148)["admin_level"=6][name!~"^(городской округ Пенза)$"];
+rel(area.r148penza)["admin_level"=9];
+
+// district 159-163
+rel(area.r159)["admin_level"=6][name!~"^(городской округ Самара|городской округ Тольятти|Волжский район|Ставропольский район)$"];
+rel(area.r159samara)["admin_level"=9];
+rel(area.r159tolyatti)["admin_level"=9];
+rel(area.r159volzhsky)["admin_level"=8];
+rel(area.r159stavropolsky)["admin_level"=8];
+
+// district 164-167
+rel(area.r164)["admin_level"=6];
+rel(area.r164saratov)["admin_level"=9];
+
+// district 185-186
+rel(area.r185)["admin_level"=6][name!~"^(городской округ Ульяновск)$"];
+rel(area.r185ulyanovsk)["admin_level"=9];
+
+)
+->.o1;
+
+(
+  .o1;
+  way(r.o1);
+  node(w);
+)->.o2;
+
+.o2 out body;

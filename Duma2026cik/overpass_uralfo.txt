@@ -1,0 +1,58 @@
+area[name="Уральский федеральный округ"][admin_level=3]->.uralfo;
+
+
+// district 169-175
+rel(area.uralfo)[name="Свердловская область"][admin_level=4];
+map_to_area -> .r169;
+rel(area.uralfo)[name="городской округ Екатеринбург"][admin_level=6];
+map_to_area -> .r169ekaterinburg;
+
+// district 183-184
+rel(area.uralfo)[name="Тюменская область"][admin_level=4];
+map_to_area -> .r183;
+rel(area.uralfo)[name="городской округ Тюмень"][admin_level=6];
+map_to_area -> .r183tyumen;
+
+// district 188-191
+rel(area.uralfo)[name="Челябинская область"][admin_level=4];
+map_to_area -> .r188;
+rel(area.uralfo)[name="Челябинский городской округ"][admin_level=6];
+map_to_area -> .r188chelyabinsk;
+
+// district 222-223
+rel(area.uralfo)[name="Ханты-Мансийский автономный округ — Югра"][admin_level=4];
+map_to_area -> .r222;
+
+(
+
+// district 109
+rel(area.uralfo)["admin_level"=4][name="Курганская область"];
+
+// district 169-175
+rel(area.r169)["admin_level"=6][name!~"^(городской округ Екатеринбург)$"];
+rel(area.r169ekaterinburg)["admin_level"=9];
+
+// district 183-184
+rel(area.r183)["admin_level"=6][name!~"^(городской округ Тюмень)$"];
+rel(area.r183tyumen)["admin_level"=9];
+
+// district 188-191
+rel(area.r188)["admin_level"=6][name!~"^(Челябинский городской округ)$"];
+rel(area.r188chelyabinsk)["admin_level"=9];
+
+// district 222-223
+rel(area.r222)["admin_level"=6];
+
+// district 225
+rel(area.uralfo)["admin_level"=4][name="Ямало-Ненецкий автономный округ"];
+
+)
+->.o1;
+
+(
+  .o1;
+  way(r.o1);
+  node(w);
+)->.o2;
+
+.o2 out body;

@@ -1,0 +1,46 @@
+area[name="Северо-Кавказский федеральный округ"][admin_level=3]->.skfo;
+
+
+// district 10-12
+rel(area.skfo)[name="Дагестан"][admin_level=4];
+map_to_area -> .r10;
+
+
+// district 69-72
+rel(area.skfo)[name="Ставропольский край"][admin_level=4];
+map_to_area -> .r69;
+rel(area.skfo)[name="городской округ Ставрополь"][admin_level=6];
+map_to_area -> .r69stavropol;
+
+(
+// district 10-12
+rel(area.r10)["admin_level"=6];
+
+// district 16
+rel(area.skfo)["admin_level"=4][name="Ингушетия"];
+
+// district 17
+rel(area.skfo)["admin_level"=4][name="Кабардино-Балкария"];
+
+// district 19
+rel(area.skfo)["admin_level"=4][name="Карачаево-Черкесия"];
+
+// district 30
+rel(area.skfo)["admin_level"=4][name="Северная Осетия — Алания"];
+
+// district 41
+rel(area.skfo)["admin_level"=4][name="Чечня"];
+
+// district 69-72
+rel(area.r69)["admin_level"=6][name!~"^(городской округ Ставрополь)$"];
+rel(area.r69stavropol)["admin_level"=9];
+)
+->.o1;
+
+(
+  .o1;
+  way(r.o1);
+  node(w);
+)->.o2;
+
+.o2 out body;

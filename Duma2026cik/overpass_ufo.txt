@@ -1,0 +1,77 @@
+area[name="Южный федеральный округ"][admin_level=3]->.ufo;
+
+
+// district 23-25
+rel(area.ufo)[name="Республика Крым"][admin_level=4];
+map_to_area -> .r23;
+
+// district 49-57
+rel(area.ufo)[name="Краснодарский край"][admin_level=4];
+map_to_area -> .r49;
+rel(area.ufo)[name="городской округ Краснодар"][admin_level=6];
+map_to_area -> .r49krasnodar;
+rel(area.ufo)[name="Динской район"][admin_level=6];
+map_to_area -> .r49dinskoy;
+rel(area.ufo)[name="Апшеронский район"][admin_level=6];
+map_to_area -> .r49apsheronsky;
+rel(area.ufo)[name="Новопокровский район"][admin_level=6];
+map_to_area -> .r49novopokrovsky;
+
+// district 78
+rel(area.ufo)["admin_level"=4][name="Астраханская область"];
+
+// district 85-87
+rel(area.ufo)[name="Волгоградская область"][admin_level=4];
+map_to_area -> .r85;
+rel(area.ufo)[name="городской округ Волгоград"][admin_level=6];
+map_to_area -> .r85volgograg;
+
+// district 151-156
+rel(area.ufo)[name="Ростовская область"][admin_level=4];
+map_to_area -> .r151;
+rel(area.ufo)[name="городской округ Ростов-на-Дону"][admin_level=6];
+map_to_area -> .r151rostov;
+rel(area.ufo)[name="Октябрьский район"][admin_level=6];
+map_to_area -> .r151oktyabrsky;
+
+(
+// district 1
+rel(area.ufo)["admin_level"=4][name="Адыгея"];
+
+// district 18
+rel(area.ufo)["admin_level"=4][name="Калмыкия"];
+
+// district 23-25
+rel(area.r23)["admin_level"=6];
+
+// district 49-57
+rel(area.r49)["admin_level"=6][name!~"^(городской округ Краснодар|Динской район|Апшеронский район|Новопокровский район)$"];
+rel(area.r49krasnodar)["admin_level"=9];
+rel(area.r49dinskoy)["admin_level"=8];
+rel(area.r49apsheronsky)["admin_level"=8];
+rel(area.r49novopokrovsky)["admin_level"=8];
+
+// district 78
+rel(area.ufo)["admin_level"=4][name="Астраханская область"];
+
+// district 85-87
+rel(area.r85)["admin_level"=6][name!~"^(городской округ Волгоград)$"];
+rel(area.r85volgograg)["admin_level"=9];
+
+// district 151-156
+rel(area.r151)["admin_level"=6][name!~"^(городской округ Ростов-на-Дону|Октябрьский район)$"];
+rel(area.r151rostov)["admin_level"=9];
+rel(area.r151oktyabrsky)["admin_level"=8];
+
+// district 219
+rel(area.ufo)["admin_level"=4][name="Севастополь"];
+)
+->.o1;
+
+(
+  .o1;
+  way(r.o1);
+  node(w);
+)->.o2;
+
+.o2 out body;

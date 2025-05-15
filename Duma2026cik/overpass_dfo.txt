@@ -1,0 +1,64 @@
+area[name="Дальневосточный федеральный округ"][admin_level=3]->.dfo;
+
+
+// district 66-68
+rel(area.dfo)[name="Приморский край"][admin_level=4];
+map_to_area -> .r66;
+rel(area.dfo)[name="Владивостокский городской округ"][admin_level=6];
+map_to_area -> .r66vladivostok;
+
+// district 73-74
+rel(area.dfo)[name="Хабаровский край"][admin_level=4];
+map_to_area -> .r73;
+rel(area.dfo)[name="городской округ Хабаровск"][admin_level=6];
+map_to_area -> .r73khabarovsk_city;
+rel(area.dfo)[name="Хабаровский район"][admin_level=6];
+map_to_area -> .r73khabarovsk_reg;
+
+(
+// district 9
+rel(area.dfo)["admin_level"=4][name="Республика Бурятия"];
+
+// district 29
+rel(area.dfo)["admin_level"=4][name="Республика Саха (Якутия)"];
+
+// district 47
+rel(area.dfo)["admin_level"=4][name="Забайкальский край"];
+
+// district 48
+rel(area.dfo)["admin_level"=4][name="Камчатский край"];
+
+// district 66-68
+rel(area.r66)["admin_level"=6][name!~"^(Владивостокский городской округ)$"];
+rel(area.r66vladivostok)["admin_level"=9];
+
+// district 73-74
+rel(area.r73)["admin_level"=6][name!~"^(городской округ Хабаровск)$"];
+rel(area.r73khabarovsk_city)["admin_level"=9];
+rel(area.r73khabarovsk_reg)["admin_level"=8];
+
+// district 75
+rel(area.dfo)["admin_level"=4][name="Амурская область"];
+
+// district 118
+rel(area.dfo)["admin_level"=4][name="Магаданская область"];
+
+// district 168
+rel(area.dfo)["admin_level"=4][name="Сахалинская область"];
+
+// district 220
+rel(area.dfo)["admin_level"=4][name="Еврейская автономная область"];
+
+// district 224
+rel(area.dfo)["admin_level"=4][name="Чукотский автономный округ"];
+
+)
+->.o1;
+
+(
+  .o1;
+  way(r.o1);
+  node(w);
+)->.o2;
+
+.o2 out body;

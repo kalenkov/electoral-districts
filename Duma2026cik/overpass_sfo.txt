@@ -1,0 +1,99 @@
+area[name="Сибирский федеральный округ"][admin_level=3]->.sfo;
+
+
+// district 44-46
+rel(area.sfo)[name="Алтайский край"][admin_level=4];
+map_to_area -> .r44;
+rel(area.sfo)[name="городской округ Барнаул"][admin_level=6];
+map_to_area -> .r44barnaul;
+
+// district 57-61
+rel(area.sfo)[name="Красноярский край"][admin_level=4];
+map_to_area -> .r57;
+rel(area.sfo)[name="городской округ Красноярск"][admin_level=6];
+map_to_area -> .r57krasnoyarsk;
+rel(area.sfo)[name="Берёзовский район"][admin_level=6];
+map_to_area -> .r57beryozovsky;
+rel(area.sfo)[name="Емельяновский район"][admin_level=6];
+map_to_area -> .r57yemelyanovsky;
+
+// district 95-98
+rel(area.sfo)[name="Иркутская область"][admin_level=4];
+map_to_area -> .r95;
+rel(area.sfo)[name="городской округ Иркутск"][admin_level=6];
+map_to_area -> .r95irkutsk;
+
+// district 102-105
+rel(area.sfo)[name="Кемеровская область"][admin_level=4];
+map_to_area -> .r102;
+rel(area.sfo)[name="Кемеровский городской округ"][admin_level=6];
+map_to_area -> .r102kemerovo;
+
+// district 137-140
+rel(area.sfo)[name="Новосибирская область"][admin_level=4];
+map_to_area -> .r137;
+rel(area.sfo)[name="городской округ Новосибирск"][admin_level=6];
+map_to_area -> .r137novosibirsk_city;
+rel(area.sfo)[name="Новосибирский район"][admin_level=6];
+map_to_area -> .r137novosibirsk_dis;
+
+// district 141-143
+rel(area.sfo)[name="Омская область"][admin_level=4];
+map_to_area -> .r141;
+rel(area.sfo)[name="городской округ Омск"][admin_level=6];
+map_to_area -> .r141omsk_city;
+rel(area.sfo)[name="Омский район"][admin_level=6];
+map_to_area -> .r141omsk_dis;
+
+(
+// district 2
+rel(area.sfo)["admin_level"=4][name="Республика Алтай"];
+
+// district 37
+rel(area.sfo)["admin_level"=4][name="Республика Тыва"];
+
+// district 40
+rel(area.sfo)["admin_level"=4][name="Республика Хакасия"];
+
+// district 44
+rel(area.r44)["admin_level"=6][name!="городской округ Барнаул"];
+rel(area.r44barnaul)["admin_level"=9];
+
+// district 57-61
+rel(area.r57)["admin_level"=6][name!~"^(городской округ Красноярск|Берёзовский район|Емельяновский район)$"];
+rel(area.r57krasnoyarsk)["admin_level"=9];
+rel(area.r57beryozovsky)["admin_level"=8];
+rel(area.r57yemelyanovsky)["admin_level"=8];
+
+// district 95-98
+rel(area.r95)["admin_level"=6][name!~"^(городской округ Иркутск)$"];
+rel(area.r95irkutsk)["admin_level"=9];
+
+// district 95-98
+rel(area.r102)["admin_level"=6][name!~"^(Кемеровский городской округ)$"];
+rel(area.r102kemerovo)["admin_level"=9];
+
+// district 137-140
+rel(area.r137)["admin_level"=6][name!~"^(городской округ Новосибирск|Новосибирский район)$"];
+rel(area.r137novosibirsk_city)["admin_level"=9];
+rel(area.r137novosibirsk_dis)["admin_level"=8];
+
+// district 141-143
+rel(area.r141)["admin_level"=6][name!~"^(городской округ Омск|Омский район)$"];
+rel(area.r141omsk_city)["admin_level"=9];
+rel(area.r141omsk_dis)["admin_level"=8];
+
+// district 180
+rel(area.sfo)["admin_level"=4][name="Томская область"];
+
+
+)
+->.o1;
+
+(
+  .o1;
+  way(r.o1);
+  node(w);
+)->.o2;
+
+.o2 out body;

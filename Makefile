@@ -108,67 +108,67 @@ tmp_noqgis_source_and_splits_union.vrt: tmp_source.gpkg tmp_noqgis_splits_union.
 	echo "$$SOURCE_AND_SPLITS_UNION_NOQGIS_VRT" > tmp_noqgis_source_and_splits_union.vrt
 
 tmp_noqgis_source_splitted.gpkg: tmp_noqgis_source_and_splits_union.vrt
-	ogr2ogr -f "GPKG" -overwrite tmp_noqgis_source_splitted.gpkg tmp_noqgis_source_and_splits_union.vrt -dialect SQLITE -sql "SELECT ST_Intersection(A.geom, B.geom) AS geom, A.district AS district, A.osm_id AS osm_id FROM tmp_source A, tmp_noqgis_splits_union B WHERE ST_Intersects(A.geom, B.geom)" -nlt MULTIPOLYGON -skipfailures -nln tmp_noqgis_source_splitted
+	ogr2ogr -f "GPKG" -overwrite tmp_noqgis_source_splitted.gpkg tmp_noqgis_source_and_splits_union.vrt -dialect SQLITE -sql "SELECT ST_Intersection(A.geom, B.geom) AS geom, A.district AS district, A.osm_id AS osm_id FROM tmp_source A, tmp_noqgis_splits_union B WHERE ST_Intersects(A.geom, B.geom)" -skipfailures -nlt MULTIPOLYGON -nln tmp_noqgis_source_splitted
 
-	ogr2ogr -f "GPKG" -append tmp_noqgis_source_splitted.gpkg tmp_noqgis_source_and_splits_union.vrt -dialect SQLITE -sql "SELECT ST_Difference(A.geom, B.geom) AS geom, A.district AS district, A.osm_id AS osm_id FROM tmp_source A, tmp_noqgis_splits_union B WHERE ST_Difference(A.geom, B.geom) IS NOT NULL" -nlt MULTIPOLYGON -nln tmp_noqgis_source_splitted
+	ogr2ogr -f "GPKG" -append tmp_noqgis_source_splitted.gpkg tmp_noqgis_source_and_splits_union.vrt -dialect SQLITE -sql "SELECT ST_Difference(A.geom, B.geom) AS geom, A.district AS district, A.osm_id AS osm_id FROM tmp_source A, tmp_noqgis_splits_union B WHERE ST_Difference(A.geom, B.geom) IS NOT NULL" -skipfailures -nlt MULTIPOLYGON -nln tmp_noqgis_source_splitted
 
 # NOQGIS PART END
 
 ifeq ($(NOQGIS), no)
 # union back all polygons with the same district attribute
 tmp_source_reunion.gpkg: tmp_source_splitted.gpkg
-	ogr2ogr -f "GPKG" -overwrite tmp_source_reunion.gpkg tmp_source_splitted.gpkg -dialect SQLITE -sql "SELECT ST_Union(geom) AS geom, * FROM tmp_source_splitted GROUP BY osm_id" -nln tmp_source_reunion -nlt MULTIPOLYGON
+	ogr2ogr -f "GPKG" -overwrite tmp_source_reunion.gpkg tmp_source_splitted.gpkg -dialect SQLITE -sql "SELECT ST_Union(geom) AS geom, * FROM tmp_source_splitted GROUP BY osm_id" -nlt MULTIPOLYGON -nln tmp_source_reunion
 else
 # union back all polygons with the same district attribute
 tmp_source_reunion.gpkg: tmp_noqgis_source_splitted.gpkg
-	ogr2ogr -f "GPKG" -overwrite tmp_source_reunion.gpkg tmp_noqgis_source_splitted.gpkg -dialect SQLITE -sql "SELECT ST_Union(geom) AS geom, * FROM tmp_noqgis_source_splitted GROUP BY osm_id" -nln tmp_source_reunion -nlt MULTIPOLYGON
+	ogr2ogr -f "GPKG" -overwrite tmp_source_reunion.gpkg tmp_noqgis_source_splitted.gpkg -dialect SQLITE -sql "SELECT ST_Union(geom) AS geom, * FROM tmp_noqgis_source_splitted GROUP BY osm_id" -nlt MULTIPOLYGON -nln tmp_source_reunion
 endif
 
 # mark all disticts, that are contained entirely within the electoral district, and store result in tmp_entire_districts.gpkg file
 tmp_entire_districts.gpkg: tmp_source_reunion.gpkg full.csv
-	ogr2ogr -f "GPKG" -overwrite tmp_entire_districts.gpkg tmp_source_reunion.gpkg -dialect OGRSQL -sql "SELECT tmp_source_reunion.district AS district, tmp_source_reunion.osm_id AS osm_id, full.electoral_district AS electoral_district FROM tmp_source_reunion JOIN 'full.csv'.full AS full ON (tmp_source_reunion.district = full.district AND full.osm_id='') OR (tmp_source_reunion.osm_id = full.osm_id AND full.osm_id!='')" -nln tmp_entire_districts
+	ogr2ogr -f "GPKG" -overwrite tmp_entire_districts.gpkg tmp_source_reunion.gpkg -dialect OGRSQL -sql "SELECT tmp_source_reunion.district AS district, tmp_source_reunion.osm_id AS osm_id, full.electoral_district AS electoral_district FROM tmp_source_reunion JOIN 'full.csv'.full AS full ON (tmp_source_reunion.district = full.district AND full.osm_id='') OR (tmp_source_reunion.osm_id = full.osm_id AND full.osm_id!='')" -nlt MULTIPOLYGON -nln tmp_entire_districts
 
 # select all other disticts and store them in tmp_part_districts.gpkg file
 tmp_part_districts.gpkg: tmp_entire_districts.gpkg
-	ogr2ogr -f "GPKG" -overwrite tmp_part_districts.gpkg tmp_entire_districts.gpkg -dialect OGRSQL -sql "SELECT district, osm_id FROM tmp_entire_districts WHERE electoral_district IS NULL" -nln tmp_part_districts
+	ogr2ogr -f "GPKG" -overwrite tmp_part_districts.gpkg tmp_entire_districts.gpkg -dialect OGRSQL -sql "SELECT district, osm_id FROM tmp_entire_districts WHERE electoral_district IS NULL" -nlt MULTIPOLYGON -nln tmp_part_districts
 
 tmp_part_plus_splits.vrt: tmp_part_districts.gpkg tmp_splits.gpkg
 	echo "$$PART_AND_SPLITS_VRT" > tmp_part_plus_splits.vrt
 
 # find intersection of the splitted district with appropriate polygon from the "splits" layer
 tmp_parts_intersections.gpkg: tmp_part_plus_splits.vrt
-	ogr2ogr -f "GPKG" -overwrite tmp_parts_intersections.gpkg tmp_part_plus_splits.vrt -dialect SQLITE -sql "SELECT ST_Intersection(A.geom, B.geom) AS geom, A.*, B.inside AS electoral_district FROM tmp_part_districts A, tmp_splits B WHERE ST_Intersects(A.geom, B.geom) AND B.inside IS NOT NULL AND ((A.district=B.district AND B.osm_id IS NULL) OR (A.osm_id=B.osm_id AND B.osm_id IS NOT NULL))" -nlt MULTIPOLYGON -skipfailures -nln tmp_parts_intersections
+	ogr2ogr -f "GPKG" -overwrite tmp_parts_intersections.gpkg tmp_part_plus_splits.vrt -dialect SQLITE -sql "SELECT ST_Intersection(A.geom, B.geom) AS geom, A.*, B.inside AS electoral_district FROM tmp_part_districts A, tmp_splits B WHERE ST_Intersects(A.geom, B.geom) AND B.inside IS NOT NULL AND ((A.district=B.district AND B.osm_id IS NULL) OR (A.osm_id=B.osm_id AND B.osm_id IS NOT NULL))" -skipfailures -nlt MULTIPOLYGON -nln tmp_parts_intersections
 
 # find difference of the splitted district with appropriate polygon from the "splits" layer
 tmp_parts_difference.gpkg: tmp_part_plus_splits.vrt
-	ogr2ogr -f "GPKG" -overwrite tmp_parts_difference.gpkg tmp_part_plus_splits.vrt -dialect SQLITE -sql "SELECT ST_Difference(A.geom, B.geom) AS geom, A.*, B.outside AS electoral_district FROM tmp_part_districts A, tmp_splits B WHERE ST_Difference(A.geom, B.geom) IS NOT NULL AND B.outside IS NOT NULL AND ((A.district=B.district AND B.osm_id IS NULL) OR (A.osm_id=B.osm_id AND B.osm_id IS NOT NULL))" -nlt MULTIPOLYGON -nln tmp_parts_difference
+	ogr2ogr -f "GPKG" -overwrite tmp_parts_difference.gpkg tmp_part_plus_splits.vrt -dialect SQLITE -sql "SELECT ST_Difference(A.geom, B.geom) AS geom, A.*, B.outside AS electoral_district FROM tmp_part_districts A, tmp_splits B WHERE ST_Difference(A.geom, B.geom) IS NOT NULL AND B.outside IS NOT NULL AND ((A.district=B.district AND B.osm_id IS NULL) OR (A.osm_id=B.osm_id AND B.osm_id IS NOT NULL))" -skipfailures -nlt MULTIPOLYGON -nln tmp_parts_difference
 
 # combine all parts into single layer
 tmp_electoral_districts.gpkg: tmp_entire_districts.gpkg tmp_parts_intersections.gpkg tmp_parts_difference.gpkg
-	ogr2ogr -f "GPKG" -overwrite tmp_electoral_districts.gpkg tmp_entire_districts.gpkg -dialect OGRSQL -sql "SELECT district, electoral_district FROM tmp_entire_districts WHERE electoral_district IS NOT NULL" -nln tmp_electoral_districts
-	ogr2ogr -f "GPKG" -append tmp_electoral_districts.gpkg tmp_parts_intersections.gpkg -dialect OGRSQL -sql "SELECT district, electoral_district FROM tmp_parts_intersections" -nln tmp_electoral_districts
-	ogr2ogr -f "GPKG" -append tmp_electoral_districts.gpkg tmp_parts_difference.gpkg -dialect OGRSQL -sql "SELECT district, electoral_district FROM tmp_parts_difference" -nln tmp_electoral_districts
+	ogr2ogr -f "GPKG" -overwrite tmp_electoral_districts.gpkg tmp_entire_districts.gpkg -dialect OGRSQL -sql "SELECT district, electoral_district FROM tmp_entire_districts WHERE electoral_district IS NOT NULL" -nlt MULTIPOLYGON -nln tmp_electoral_districts
+	ogr2ogr -f "GPKG" -append tmp_electoral_districts.gpkg tmp_parts_intersections.gpkg -dialect OGRSQL -sql "SELECT district, electoral_district FROM tmp_parts_intersections" -nlt MULTIPOLYGON -nln tmp_electoral_districts
+	ogr2ogr -f "GPKG" -append tmp_electoral_districts.gpkg tmp_parts_difference.gpkg -dialect OGRSQL -sql "SELECT district, electoral_district FROM tmp_parts_difference" -nlt MULTIPOLYGON -nln tmp_electoral_districts
 
 # dissolve the regions which belong to the same electoral district
 tmp_electoral_districts_dissolved.gpkg: tmp_electoral_districts.gpkg
-	ogr2ogr -f "GPKG" -overwrite tmp_electoral_districts_dissolved.gpkg tmp_electoral_districts.gpkg -dialect SQLITE -sql "SELECT ST_Union(geom) AS geom, electoral_district FROM tmp_electoral_districts GROUP BY electoral_district" -nln tmp_electoral_districts_dissolved -nlt MULTIPOLYGON
+	ogr2ogr -f "GPKG" -overwrite tmp_electoral_districts_dissolved.gpkg tmp_electoral_districts.gpkg -dialect SQLITE -sql "SELECT ST_Union(geom) AS geom, electoral_district FROM tmp_electoral_districts GROUP BY electoral_district" -nlt MULTIPOLYGON -nln tmp_electoral_districts_dissolved
 
 tmp_dissolved_and_land.vrt: tmp_electoral_districts_dissolved.gpkg land.gpkg
 	echo "$$DISSOLVED_AND_LAND_VRT" > tmp_dissolved_and_land.vrt
 
 # crop electoral districts with land polygon
 tmp_electoral_districts_land.gpkg: tmp_dissolved_and_land.vrt
-	ogr2ogr -f "GPKG" -overwrite tmp_electoral_districts_land.gpkg tmp_dissolved_and_land.vrt -dialect SQLITE -sql "SELECT ST_Union(ST_CollectionExtract(ST_Intersection(A.geom, B.geom),3)) AS geom, A.electoral_district AS electoral_district FROM tmp_electoral_districts_dissolved A, land B WHERE ST_Intersects(A.geom, B.geom) GROUP BY A.electoral_district" -nlt MULTIPOLYGON -skipfailures -nln tmp_electoral_districts_land
+	ogr2ogr -f "GPKG" -overwrite tmp_electoral_districts_land.gpkg tmp_dissolved_and_land.vrt -dialect SQLITE -sql "SELECT ST_Union(ST_CollectionExtract(ST_Intersection(A.geom, B.geom),3)) AS geom, A.electoral_district AS electoral_district FROM tmp_electoral_districts_dissolved A, land B WHERE ST_Intersects(A.geom, B.geom) GROUP BY A.electoral_district" -skipfailures -nlt MULTIPOLYGON -nln tmp_electoral_districts_land
 
 # export the final result to the GeoJSON file and add the supplemental attributes from data.csv file
 ifeq ($(CROPLAND), yes)
 electoral_districts.geojson: tmp_electoral_districts_land.gpkg data.csv
 	rm -f electoral_districts.geojson
-	ogr2ogr -f GeoJSON electoral_districts.geojson tmp_electoral_districts_land.gpkg -dialect OGRSQL -sql "SELECT tmp_electoral_districts_land.electoral_district AS electoral_district, data.* FROM tmp_electoral_districts_land LEFT JOIN 'data.csv'.data ON tmp_electoral_districts_land.electoral_district = data.electoral_district" -nln electoral_districts
+	ogr2ogr -f GeoJSON electoral_districts.geojson tmp_electoral_districts_land.gpkg -dialect OGRSQL -sql "SELECT tmp_electoral_districts_land.electoral_district AS electoral_district, data.* FROM tmp_electoral_districts_land LEFT JOIN 'data.csv'.data ON tmp_electoral_districts_land.electoral_district = data.electoral_district" -nlt MULTIPOLYGON -nln electoral_districts
 else
 electoral_districts.geojson: tmp_electoral_districts_dissolved.gpkg data.csv
 	rm -f electoral_districts.geojson
-	ogr2ogr -f GeoJSON electoral_districts.geojson tmp_electoral_districts_dissolved.gpkg -dialect OGRSQL -sql "SELECT tmp_electoral_districts_dissolved.electoral_district AS electoral_district, data.* FROM tmp_electoral_districts_dissolved LEFT JOIN 'data.csv'.data ON tmp_electoral_districts_dissolved.electoral_district = data.electoral_district" -nln electoral_districts
+	ogr2ogr -f GeoJSON electoral_districts.geojson tmp_electoral_districts_dissolved.gpkg -dialect OGRSQL -sql "SELECT tmp_electoral_districts_dissolved.electoral_district AS electoral_district, data.* FROM tmp_electoral_districts_dissolved LEFT JOIN 'data.csv'.data ON tmp_electoral_districts_dissolved.electoral_district = data.electoral_district" -nlt MULTIPOLYGON -nln electoral_districts
 endif
 
 
@@ -186,13 +186,13 @@ diff_new_and_orig_geojson.vrt: electoral_districts.geojson electoral_districts_o
 	echo "$$DIFF_NEW_AND_ORIG_GEOJSON_VRT" > diff_new_and_orig_geojson.vrt
 
 diff_intersection.gpkg: diff_new_and_orig.vrt
-	ogr2ogr -f "GPKG" -overwrite diff_intersection.gpkg diff_new_and_orig.vrt -dialect SQLITE -sql "SELECT ST_Intersection(A.geom, B.geom) AS geom, ST_Area(ST_Intersection(A.geom, B.geom)) AS area, ST_Area(A.geom) AS areaA, ST_Area(B.geom) AS areaB, A.electoral_district AS electoral_district FROM diff_electoral_districts A, diff_electoral_districts_orig B WHERE ST_Intersects(A.geom, B.geom) AND A.electoral_district=B.electoral_district" -nlt MULTIPOLYGON -skipfailures -nln diff_intersection
+	ogr2ogr -f "GPKG" -overwrite diff_intersection.gpkg diff_new_and_orig.vrt -dialect SQLITE -sql "SELECT ST_Intersection(A.geom, B.geom) AS geom, ST_Area(ST_Intersection(A.geom, B.geom)) AS area, ST_Area(A.geom) AS areaA, ST_Area(B.geom) AS areaB, A.electoral_district AS electoral_district FROM diff_electoral_districts A, diff_electoral_districts_orig B WHERE ST_Intersects(A.geom, B.geom) AND A.electoral_district=B.electoral_district" -skipfailures -nlt MULTIPOLYGON -nln diff_intersection
 
 diff_difference_new_orig.gpkg: diff_new_and_orig.vrt
-	ogr2ogr -f "GPKG" -overwrite diff_difference_new_orig.gpkg diff_new_and_orig.vrt -dialect SQLITE -sql "SELECT ST_Difference(A.geom, B.geom) AS geom, A.electoral_district AS electoral_district, ST_Area(ST_Difference(A.geom, B.geom)) AS area, ST_Area(A.geom) AS areaA, ST_Area(B.geom) AS areaB FROM diff_electoral_districts A, diff_electoral_districts_orig B WHERE ST_Difference(A.geom, B.geom) IS NOT NULL AND A.electoral_district=B.electoral_district" -nlt MULTIPOLYGON -nln diff_difference_new_orig
+	ogr2ogr -f "GPKG" -overwrite diff_difference_new_orig.gpkg diff_new_and_orig.vrt -dialect SQLITE -sql "SELECT ST_Difference(A.geom, B.geom) AS geom, A.electoral_district AS electoral_district, ST_Area(ST_Difference(A.geom, B.geom)) AS area, ST_Area(A.geom) AS areaA, ST_Area(B.geom) AS areaB FROM diff_electoral_districts A, diff_electoral_districts_orig B WHERE ST_Difference(A.geom, B.geom) IS NOT NULL AND A.electoral_district=B.electoral_district" -skipfailures -nlt MULTIPOLYGON -nln diff_difference_new_orig
 
 diff_difference_orig_new.gpkg: diff_new_and_orig.vrt
-	ogr2ogr -f "GPKG" -overwrite diff_difference_orig_new.gpkg diff_new_and_orig.vrt -dialect SQLITE -sql "SELECT ST_Difference(A.geom, B.geom) AS geom, A.electoral_district AS electoral_district, ST_Area(ST_Difference(A.geom, B.geom)) AS area, ST_Area(A.geom) AS areaA, ST_Area(B.geom) AS areaB FROM diff_electoral_districts_orig A, diff_electoral_districts B WHERE ST_Difference(A.geom, B.geom) IS NOT NULL AND A.electoral_district=B.electoral_district" -nlt MULTIPOLYGON -nln diff_difference_orig_new
+	ogr2ogr -f "GPKG" -overwrite diff_difference_orig_new.gpkg diff_new_and_orig.vrt -dialect SQLITE -sql "SELECT ST_Difference(A.geom, B.geom) AS geom, A.electoral_district AS electoral_district, ST_Area(ST_Difference(A.geom, B.geom)) AS area, ST_Area(A.geom) AS areaA, ST_Area(B.geom) AS areaB FROM diff_electoral_districts_orig A, diff_electoral_districts B WHERE ST_Difference(A.geom, B.geom) IS NOT NULL AND A.electoral_district=B.electoral_district" -skipfailures -nlt MULTIPOLYGON -nln diff_difference_orig_new
 
 diff_electoral_districts.csv: diff_electoral_districts.gpkg
 	ogr2ogr -f CSV diff_electoral_districts.csv diff_electoral_districts.gpkg -dialect SQLITE -sql "SELECT * FROM diff_electoral_districts"

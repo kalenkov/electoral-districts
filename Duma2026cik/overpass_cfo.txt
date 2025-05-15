@@ -1,0 +1,159 @@
+area[name="Центральный федеральный округ"][admin_level=3]->.cfo;
+
+// district 79-80
+rel(area.cfo)[name="Белгородская область"][admin_level=4];
+map_to_area -> .r79;
+
+// district 81-82
+rel(area.cfo)[name="Брянская область"][admin_level=4];
+map_to_area -> .r81;
+rel(area.cfo)[name="городской округ Брянск"][admin_level=6];
+map_to_area -> .r81bryansk_city;
+rel(area.cfo)[name="Брянский район"][admin_level=6];
+map_to_area -> .r81bryansk_dis;
+
+// district 83-84
+rel(area.cfo)[name="Владимирская область"][admin_level=4];
+map_to_area -> .r83;
+rel(area.cfo)[name="городской округ Владимир"][admin_level=6];
+map_to_area -> .r83vladimir;
+
+// district 90-92
+rel(area.cfo)[name="Воронежская область"][admin_level=4];
+map_to_area -> .r90;
+rel(area.cfo)[name="городской округ Воронеж"][admin_level=6];
+map_to_area -> .r90voronezh;
+
+// district 110-111
+rel(area.cfo)[name="Курская область"][admin_level=4];
+map_to_area -> .r110;
+rel(area.cfo)[name="городской округ Курск"][admin_level=6];
+map_to_area -> .r110kursk_city;
+rel(area.cfo)[name="Курский район"][admin_level=6];
+map_to_area -> .r110kursk_dis;
+
+// district 116-117
+rel(area.cfo)[name="Липецкая область"][admin_level=4];
+map_to_area -> .r116;
+rel(area.cfo)[name="городской округ Липецк"][admin_level=6];
+map_to_area -> .r116lipetsk;
+
+// district 118-129
+rel(area.cfo)[name="Московская область"][admin_level=4];
+map_to_area -> .r118;
+
+// district 157-158
+rel(area.cfo)[name="Рязанская область"][admin_level=4];
+map_to_area -> .r157;
+rel(area.cfo)[name="городской округ Рязань"][admin_level=6];
+map_to_area -> .r157ryazan_city;
+rel(area.cfo)[name="Рязанский район"][admin_level=6];
+map_to_area -> .r157ryazan_dis;
+
+// district 178-179
+rel(area.cfo)[name="Тверская область"][admin_level=4];
+map_to_area -> .r178;
+rel(area.cfo)[name="городской округ Тверь"][admin_level=6];
+map_to_area -> .r178tver;
+
+// district 181-182
+rel(area.cfo)[name="Тульская область"][admin_level=4];
+map_to_area -> .r181;
+rel(area.cfo)[name="городской округ Тула"][admin_level=6];
+map_to_area -> .r181tula;
+
+// district 192-193
+rel(area.cfo)[name="Ярославская область"][admin_level=4];
+map_to_area -> .r192;
+rel(area.cfo)[name="городской округ Ярославль"][admin_level=6];
+map_to_area -> .r192yaroslavl_city;
+rel(area.cfo)[name="Ярославский район"][admin_level=6];
+map_to_area -> .r192yaroslavl_dis;
+rel(area.cfo)[name="Рыбинский район"][admin_level=6];
+map_to_area -> .r192rybinsk;
+
+// district 195-210
+rel(area.cfo)[name="Москва"][admin_level=4];
+map_to_area -> .r195;
+
+(
+// district 79-80
+rel(area.r79)["admin_level"=6];
+
+// district 81-82
+rel(area.r81)["admin_level"=6][name!~"^(городской округ Брянск|Брянский район)$"];
+rel(area.r81bryansk_city)["admin_level"=9];
+rel(area.r81bryansk_dis)["admin_level"=8];
+
+// district 83-84
+rel(area.r83)["admin_level"=6][name!~"^(городской округ Владимир)$"];
+rel(area.r83vladimir)["admin_level"=9];
+
+// district 90-92
+rel(area.r90)["admin_level"=6][name!~"^(городской округ Воронеж)$"];
+rel(area.r90voronezh)["admin_level"=9];
+
+// district 94
+rel(area.cfo)["admin_level"=4][name="Ивановская область"];
+
+// district 101
+rel(area.cfo)["admin_level"=4][name="Калужская область"];
+
+// district 108
+rel(area.cfo)["admin_level"=4][name="Костромская область"];
+
+// district 110-111
+rel(area.r110)["admin_level"=6][name!~"^(городской округ Курск|Курский район)$"];
+rel(area.r110kursk_city)["admin_level"=9];
+rel(area.r110kursk_dis)["admin_level"=8];
+
+// district 116-117
+rel(area.r116)["admin_level"=6][name!~"^(городской округ Липецк)$"];
+rel(area.r116lipetsk)["admin_level"=9];
+
+// district 118-129
+rel(area.r118)["admin_level"=6];
+
+// district 147
+rel(area.cfo)["admin_level"=4][name="Орловская область"];
+
+// district 157-158
+rel(area.r157)["admin_level"=6][name!~"^(городской округ Рязань|Рязанский район)$"];
+rel(area.r157ryazan_city)["admin_level"=9];
+rel(area.r157ryazan_dis)["admin_level"=8];
+
+// district 176
+rel(area.cfo)["admin_level"=4][name="Смоленская область"];
+
+// district 177
+rel(area.cfo)["admin_level"=4][name="Тамбовская область"];
+
+// district 178-179
+rel(area.r178)["admin_level"=6][name!~"^(городской округ Тверь)$"];
+rel(area.r178tver)["admin_level"=9];
+
+// district 181-182
+rel(area.r181)["admin_level"=6][name!~"^(городской округ Тула)$"];
+rel(area.r181tula)["admin_level"=9];
+
+// district 192-193
+rel(area.r192)["admin_level"=6][name!~"^(городской округ Ярославль|Ярославский район|Рыбинский район)$"];
+rel(area.r192yaroslavl_city)["admin_level"=9];
+rel(area.r192yaroslavl_dis)["admin_level"=8];
+rel(area.r192rybinsk)["admin_level"=8];
+
+// district 195-210
+rel(area.r195)["admin_level"=5][name!~"^(Восточный административный округ)$"];
+rel(area.r195)["admin_level"=8][name!~"^(Красносельский район)$"];
+rel(area.cfo)["admin_level"=5][name="Зеленоградский административный округ"];
+
+)
+->.o1;
+
+(
+  .o1;
+  way(r.o1);
+  node(w);
+)->.o2;
+
+.o2 out body;

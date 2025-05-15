@@ -1,0 +1,76 @@
+area[name="Северо-Западный федеральный округ"][admin_level=3]->.szfo;
+
+
+// district 76-77
+rel(area.szfo)[name="Архангельская область"][admin_level=4];
+map_to_area -> .r76;
+rel(area.szfo)[name="городской округ Архангельск"][admin_level=6];
+map_to_area -> .r76arkhangelsk;
+
+// district 88-89
+rel(area.szfo)[name="Вологодская область"][admin_level=4];
+map_to_area -> .r89;
+
+// district 99-100
+rel(area.szfo)[name="Калининградская область"][admin_level=4];
+map_to_area -> .r99;
+rel(area.szfo)[name="городской округ Калининград"][admin_level=6];
+map_to_area -> .r99kaliningrad;
+
+// district 112-115
+rel(area.szfo)[name="Ленинградская область"][admin_level=4];
+map_to_area -> .r112;
+rel(area.szfo)[name="Всеволожский район"][admin_level=6];
+map_to_area -> .r112vsevolzhsk;
+
+// district 211-218
+rel(area.szfo)[name="Санкт-Петербург"][admin_level=4];
+map_to_area -> .r211;
+
+(
+// district 20
+rel(area.szfo)["admin_level"=4][name="Карелия"];
+
+// district 21
+rel(area.szfo)["admin_level"=4][name="Республика Коми"];
+
+// district 76-77
+rel(area.r76)["admin_level"=6][name!~"^(городской округ Архангельск)$"];
+rel(area.r76arkhangelsk)["admin_level"=9];
+
+// district 88-89
+rel(area.r89)["admin_level"=6];
+
+// district 99-100
+rel(area.r99)["admin_level"=6][name!~"^(городской округ Калининград)$"];
+rel(area.r99kaliningrad)["admin_level"=9];
+
+// district 112-115
+rel(area.r112)["admin_level"=6][name!~"^(Всеволожский район)$"];
+rel(area.r112vsevolzhsk)["admin_level"=8];
+
+// district 130
+rel(area.szfo)["admin_level"=4][name="Мурманская область"];
+
+// district 136
+rel(area.szfo)["admin_level"=4][name="Новгородская область"];
+
+// district 150
+rel(area.szfo)["admin_level"=4][name="Псковская область"];
+
+// district 211-218
+rel(area.r211)["admin_level"=5][name!~"^(Выборгский район)$"];
+rel(area.r211)["admin_level"=8];
+
+// district 221
+rel(area.szfo)["admin_level"=4][name="Ненецкий автономный округ"];
+)
+->.o1;
+
+(
+  .o1;
+  way(r.o1);
+  node(w);
+)->.o2;
+
+.o2 out body;
