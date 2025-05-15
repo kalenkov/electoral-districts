@@ -82,6 +82,8 @@ tmp_source.gpkg: $(OSM_SOURCES)
 	$(foreach file, $(REST_OSM_SOURCES), \
 		ogr2ogr -append -f "GPKG" tmp_source.gpkg $(file) --config OGR_SQLITE_SYNCHRONOUS OFF --config OSM_USE_CUSTOM_INDEXING NO -sql "SELECT osm_id, name AS district from multipolygons where osm_id is not null" -nln tmp_source; \
 	)
+	sqlite3 tmp_source.gpkg "DELETE FROM tmp_source WHERE rowid NOT IN (SELECT MIN(rowid) FROM tmp_source GROUP BY osm_id);"
+
 
 # convert splits.geojson file into polygonal layer "splits" in the file source.gpkg
 tmp_splits.gpkg: splits.geojson
