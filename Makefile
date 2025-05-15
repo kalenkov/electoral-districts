@@ -100,11 +100,11 @@ tmp_noqgis_source_splitted.gpkg: tmp_noqgis_source_and_splits_union.vrt
 ifeq ($(NOQGIS), no)
 # union back all polygons with the same district attribute
 tmp_source_reunion.gpkg: tmp_source_splitted.gpkg
-	ogr2ogr -f "GPKG" -overwrite tmp_source_reunion.gpkg tmp_source_splitted.gpkg -dialect SQLITE -sql "SELECT ST_Union(geom) AS geom, * FROM tmp_source_splitted GROUP BY district" -nln tmp_source_reunion -nlt MULTIPOLYGON
+	ogr2ogr -f "GPKG" -overwrite tmp_source_reunion.gpkg tmp_source_splitted.gpkg -dialect SQLITE -sql "SELECT ST_Union(geom) AS geom, * FROM tmp_source_splitted GROUP BY osm_id" -nln tmp_source_reunion -nlt MULTIPOLYGON
 else
 # union back all polygons with the same district attribute
 tmp_source_reunion.gpkg: tmp_noqgis_source_splitted.gpkg
-	ogr2ogr -f "GPKG" -overwrite tmp_source_reunion.gpkg tmp_noqgis_source_splitted.gpkg -dialect SQLITE -sql "SELECT ST_Union(geom) AS geom, * FROM tmp_noqgis_source_splitted GROUP BY district" -nln tmp_source_reunion -nlt MULTIPOLYGON
+	ogr2ogr -f "GPKG" -overwrite tmp_source_reunion.gpkg tmp_noqgis_source_splitted.gpkg -dialect SQLITE -sql "SELECT ST_Union(geom) AS geom, * FROM tmp_noqgis_source_splitted GROUP BY osm_id" -nln tmp_source_reunion -nlt MULTIPOLYGON
 endif
 
 # mark all disticts, that are contained entirely within the electoral district, and store result in tmp_entire_districts.gpkg file
