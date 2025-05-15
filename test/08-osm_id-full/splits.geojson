@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "splits",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "inside": null, "outside": null, "district": null, "osm_id": null }, "geometry": { "type": "MultiPolygon", "coordinates": [ [ [ [ 37.461446948922671, 55.719720092874546 ], [ 37.453872161089009, 55.703081333335412 ], [ 37.470940686375144, 55.712717702743639 ], [ 37.461446948922671, 55.719720092874546 ] ] ] ] } }
+]
+}
