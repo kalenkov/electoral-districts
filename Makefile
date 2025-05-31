@@ -165,10 +165,16 @@ ifeq ($(CROPLAND), yes)
 electoral_districts.geojson: tmp_electoral_districts_land.gpkg data.csv
 	rm -f electoral_districts.geojson
 	ogr2ogr -f GeoJSON electoral_districts.geojson tmp_electoral_districts_land.gpkg -dialect OGRSQL -sql "SELECT tmp_electoral_districts_land.electoral_district AS electoral_district, data.* FROM tmp_electoral_districts_land LEFT JOIN 'data.csv'.data ON tmp_electoral_districts_land.electoral_district = data.electoral_district" -nlt MULTIPOLYGON -nln electoral_districts
+
+electoral_districts.gpkg: tmp_electoral_districts_land.gpkg data.csv
+	ogr2ogr -f "GPKG" -overwrite electoral_districts.gpkg tmp_electoral_districts_land.gpkg -dialect OGRSQL -sql "SELECT tmp_electoral_districts_land.electoral_district AS electoral_district, data.* FROM tmp_electoral_districts_land LEFT JOIN 'data.csv'.data ON tmp_electoral_districts_land.electoral_district = data.electoral_district" -nlt MULTIPOLYGON -nln electoral_districts
 else
 electoral_districts.geojson: tmp_electoral_districts_dissolved.gpkg data.csv
 	rm -f electoral_districts.geojson
 	ogr2ogr -f GeoJSON electoral_districts.geojson tmp_electoral_districts_dissolved.gpkg -dialect OGRSQL -sql "SELECT tmp_electoral_districts_dissolved.electoral_district AS electoral_district, data.* FROM tmp_electoral_districts_dissolved LEFT JOIN 'data.csv'.data ON tmp_electoral_districts_dissolved.electoral_district = data.electoral_district" -nlt MULTIPOLYGON -nln electoral_districts
+
+electoral_districts.gpkg: tmp_electoral_districts_dissolved.gpkg data.csv
+	ogr2ogr -f "GPKG" -overwrite electoral_districts.gpkg tmp_electoral_districts_dissolved.gpkg -dialect OGRSQL -sql "SELECT tmp_electoral_districts_dissolved.electoral_district AS electoral_district, data.* FROM tmp_electoral_districts_dissolved LEFT JOIN 'data.csv'.data ON tmp_electoral_districts_dissolved.electoral_district = data.electoral_district" -nlt MULTIPOLYGON -nln electoral_districts
 endif
 
 
